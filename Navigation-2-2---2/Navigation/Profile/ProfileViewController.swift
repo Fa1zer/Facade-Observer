@@ -11,8 +11,9 @@ import UIKit
 class ProfileViewController: UIViewController {
 
     private let headerView = ProfileHeaderView()
-    private let cellid = "post"
     private let logInViewControler = LogInViewController()
+    private let cellid = "post"
+
     
     private let tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .plain)
