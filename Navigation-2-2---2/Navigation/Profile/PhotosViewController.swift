@@ -7,11 +7,13 @@
 //
 
 import UIKit
+import iOSIntPackage
 
 class PhotosViewController: UIViewController {
     
     var images =  [UIImageView]()
     
+    private let imagePublisherFacade = ImagePublisherFacade()
     private let layout = UICollectionViewFlowLayout()
     private lazy var collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
     
@@ -29,6 +31,9 @@ class PhotosViewController: UIViewController {
                                     String(describing: PhotosCollectionViewCell.self))
         
         setupViews()
+        
+        imagePublisherFacade.subscribe(self)
+        imagePublisherFacade.addImagesWithTimer(time: 2, repeat: 10)
     }
     
     private func setupViews() {
@@ -57,6 +62,11 @@ class PhotosViewController: UIViewController {
         layout.minimumLineSpacing = 8
     }
     
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        
+        imagePublisherFacade.removeSubscription(for: self)
+    }
 }
 
 extension PhotosViewController: UICollectionViewDataSource {
@@ -67,7 +77,7 @@ extension PhotosViewController: UICollectionViewDataSource {
         let cell: PhotosCollectionViewCell = collectionView.dequeueReusableCell(withReuseIdentifier:
                                                                 String(describing: PhotosCollectionViewCell.self),
                                                                     for: indexPath) as! PhotosCollectionViewCell
-
+        
         guard images.isEmpty == false else {
             return cell
         }
@@ -75,5 +85,13 @@ extension PhotosViewController: UICollectionViewDataSource {
         cell.image = images[indexPath.item]
 
         return cell
+    }
+}
+
+extension PhotosViewController: ImageLibrarySubscriber {
+    func receive(images: [UIImage]) {
+        self.images.append(UIImageView(image: images[images.count - 1]))
+
+        collectionView.reloadItems(at: [IndexPath(item: images.count - 1, section: 0)])
     }
 }
